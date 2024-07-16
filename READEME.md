@@ -1,6 +1,6 @@
 # Bitcoin Staking and Yield Optimization Smart Contract
 
-## Overview
+## ABOUT
 
 This Clarity smart contract provides functionality for Bitcoin (BTC) staking, liquidity pool management, and leveraged trading on the Stacks blockchain. It's designed to offer users various ways to interact with their BTC holdings and potentially optimize yield.
 
