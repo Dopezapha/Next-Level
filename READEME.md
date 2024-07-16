@@ -1,47 +1,57 @@
-Bitcoin Staking and Yield Management Smart Contract
-Overview
-This smart contract manages Bitcoin (BTC) staking, liquidity pool management for BTC and USD, and leveraged BTC trading positions. It is designed to optimize yield strategies and ensure secure management of assets within the blockchain environment.
+# Bitcoin Staking and Yield Optimization Smart Contract
 
-Features
-Staking and Yield section
-btcStakes: Tracks the amount of BTC staked by each user.
+## Overview
 
-Functions:
+This Clarity smart contract provides functionality for Bitcoin (BTC) staking, liquidity pool management, and leveraged trading on the Stacks blockchain. It's designed to offer users various ways to interact with their BTC holdings and potentially optimize yield.
 
-stakeBTC(amount uint): Allows users to stake BTC tokens securely.
+## Features
 
-unstakeBTC(amount uint): Safely unstakes BTC tokens, ensuring that the amount being unstaked does not exceed the currently staked amount.
+1. BTC Staking
+2. Liquidity Pool Management
+3. Leveraged BTC Trading
+4. State Querying
 
-Liquidity Pool Management section
-btcLiquidity: Manages the liquidity of BTC tokens.
+## Functions
 
-usdLiquidity: Manages the liquidity of USD tokens.
+### Staking
 
-Functions:
+- `stake-btc`: Stake a specified amount of BTC
+- `unstake-btc`: Unstake a specified amount of BTC
 
-addLiquidityBTC(btcAmount uint, usdAmount uint): Adds liquidity to both BTC and USD pools efficiently.
+### Liquidity Pool Management
 
-removeLiquidityBTC(btcShares uint, usdShares uint): Withdraws liquidity from BTC and USD pools securely, ensuring that the requested shares are available for withdrawal.
+- `add-liquidity-btc`: Add liquidity to BTC and USD pools
+- `remove-liquidity-btc`: Remove liquidity from BTC and USD pools
 
-BTC Trading with Leverage section
-leveragedPositions: Stores leveraged trading positions for BTC.
+### Leveraged Trading
 
-Functions:
+- `open-leveraged-position`: Open a leveraged BTC trading position
+- `close-leveraged-position`: Close an active leveraged BTC trading position
+- `liquidate-leveraged-position`: Liquidate an active leveraged BTC trading position
 
-openLeveragedPosition(btcAmount uint, leverage uint): Initiates a leveraged trading position in BTC, specifying the amount and leverage.
+### Read-Only Functions
 
-closeLeveragedPosition(): Closes an active leveraged trading position in BTC.
+- `get-btc-stake`: Get the BTC stake for a specific user
+- `get-liquidity`: Get the liquidity provided by a specific user
+- `get-leveraged-position`: Get the leveraged position of a specific user
 
-liquidateLeveragedPosition(): Liquidates an active leveraged trading position, transferring the BTC amount to another specified address.
+## Usage
 
-Usage
-Deployment
-To deploy this smart contract, compile it using a suitable blockchain development environment, ensuring compatibility with the target blockchain platform's virtual machine.
+To use this contract, deploy it to the Stacks blockchain and interact with it using a Stacks wallet or through API calls.
 
-Interacting with the Smart Contract
-Interactions with the smart contract can be performed through transactions initiated on the blockchain network. Users and applications can call the defined public functions (stakeBTC, unstakeBTC, addLiquidityBTC, removeLiquidityBTC, openLeveragedPosition, closeLeveragedPosition, liquidateLeveragedPosition) to stake BTC, manage liquidity pools, and initiate leveraged trading positions.
+## Security Considerations
 
-Security Considerations
-Assertions: Functions include assertions to prevent operations that would lead to insufficient funds or liquidity issues.
+This contract is a simplified example and lacks several security features that would be necessary for a production environment. Before using in any live scenario, ensure to:
 
-Transaction Handling: Use of success and ok markers to indicate successful transaction execution.
+1. Implement robust access controls
+2. Add additional checks and balances
+3. Conduct thorough testing and auditing
+4. Implement rate limiting and other anti-abuse measures
+
+## Development
+
+This contract is written in Clarity, the smart contract language for the Stacks blockchain. To develop or modify this contract:
+
+1. Set up a Stacks development environment
+2. Use Clarity tools for testing and deployment
+3. Refer to the [Stacks documentation](https://docs.stacks.co) for best practices and updates
