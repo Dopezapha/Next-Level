@@ -1,53 +1,69 @@
-// Smart contract managing Bitcoin staking and optimizing yield strategies.
+;; Smart contract managing Bitcoin staking and optimizing yield strategies.
 
-// Staking and Yield section
-(define-stable btcStakes (response map uint))
+;; Constants
+(define-constant ERR-INSUFFICIENT-STAKE (err u100))
+(define-constant ERR-INSUFFICIENT-LIQUIDITY (err u101))
+(define-constant ERR-NO-ACTIVE-POSITION (err u102))
 
-(define-public (stakeBTC (amount uint))
-  // Function to stake BTC tokens securely
-  (success (map-set btcStakes (tx-sender) (+ (map-get btcStakes (tx-sender) 0) amount))))
+;; Data Maps
+(define-map btc-stakes principal uint)
+(define-map btc-liquidity principal uint)
+(define-map usd-liquidity principal uint)
+(define-map leveraged-positions principal {btc-amount: uint, leverage: uint})
 
-(define-public (unstakeBTC (amount uint))
-  // Function to safely unstake BTC tokens
-  (success
-    (let ((currentStake (map-get btcStakes (tx-sender) 0)))
-      (assert (> currentStake amount) "Insufficient staked amount")
-      (map-set btcStakes (tx-sender) (- currentStake amount)))))
+;; Staking and Yield section
+(define-public (stake-btc (amount uint))
+  (let ((current-stake (default-to u0 (map-get? btc-stakes tx-sender))))
+    (map-set btc-stakes tx-sender (+ current-stake amount))
+    (ok amount)))
 
-// Liquidity Pool Management section
-(define-stable btcLiquidity (response map uint))
-(define-stable usdLiquidity (response map uint))
+(define-public (unstake-btc (amount uint))
+  (let ((current-stake (default-to u0 (map-get? btc-stakes tx-sender))))
+    (asserts! (>= current-stake amount) ERR-INSUFFICIENT-STAKE)
+    (map-set btc-stakes tx-sender (- current-stake amount))
+    (ok amount)))
 
-(define-public (addLiquidityBTC (btcAmount uint) (usdAmount uint))
-  // Function to add liquidity to BTC and USD pools efficiently
-  (success
-    (map-set btcLiquidity (tx-sender) (+ (map-get btcLiquidity (tx-sender) 0) btcAmount))
-    (map-set usdLiquidity (tx-sender) (+ (map-get usdLiquidity (tx-sender) 0) usdAmount))))
+;; Liquidity Pool Management section
+(define-public (add-liquidity-btc (btc-amount uint) (usd-amount uint))
+  (let 
+    ((current-btc (default-to u0 (map-get? btc-liquidity tx-sender)))
+     (current-usd (default-to u0 (map-get? usd-liquidity tx-sender))))
+    (map-set btc-liquidity tx-sender (+ current-btc btc-amount))
+    (map-set usd-liquidity tx-sender (+ current-usd usd-amount))
+    (ok {btc-added: btc-amount, usd-added: usd-amount})))
 
-(define-public (removeLiquidityBTC (btcShares uint) (usdShares uint))
-  // Function to withdraw liquidity from BTC and USD pools securely
-  (success
-    (let ((currentBTC (map-get btcLiquidity (tx-sender) 0))
-          (currentUSD (map-get usdLiquidity (tx-sender) 0)))
-      (assert (>= currentBTC btcShares) "Insufficient BTC liquidity shares")
-      (assert (>= currentUSD usdShares) "Insufficient USD liquidity shares")
-      (map-set btcLiquidity (tx-sender) (- currentBTC btcShares))
-      (map-set usdLiquidity (tx-sender) (- currentUSD usdShares)))))
+(define-public (remove-liquidity-btc (btc-shares uint) (usd-shares uint))
+  (let 
+    ((current-btc (default-to u0 (map-get? btc-liquidity tx-sender)))
+     (current-usd (default-to u0 (map-get? usd-liquidity tx-sender))))
+    (asserts! (and (>= current-btc btc-shares) (>= current-usd usd-shares)) ERR-INSUFFICIENT-LIQUIDITY)
+    (map-set btc-liquidity tx-sender (- current-btc btc-shares))
+    (map-set usd-liquidity tx-sender (- current-usd usd-shares))
+    (ok {btc-removed: btc-shares, usd-removed: usd-shares})))
 
-// BTC Trading with Leverage section
-(define-stable leveragedPositions (response map (response uint uint)))
+;; BTC Trading with Leverage section
+(define-public (open-leveraged-position (btc-amount uint) (leverage uint))
+  (map-set leveraged-positions tx-sender {btc-amount: btc-amount, leverage: leverage})
+  (ok {btc-amount: btc-amount, leverage: leverage}))
 
-(define-public (openLeveragedPosition (btcAmount uint) (leverage uint))
-  // Function to initiate a leveraged $BTC trading position
-  (success (map-set leveragedPositions (tx-sender) (tuple btcAmount leverage))))
+(define-public (close-leveraged-position)
+  (let ((position (unwrap! (map-get? leveraged-positions tx-sender) ERR-NO-ACTIVE-POSITION)))
+    (map-delete leveraged-positions tx-sender)
+    (ok position)))
 
-(define-public (closeLeveragedPosition)
-  // Function to close an active leveraged $BTC trading position
-  (success (map-set leveragedPositions (tx-sender) (tuple 0 0))))
+(define-public (liquidate-leveraged-position (user principal))
+  (let ((position (unwrap! (map-get? leveraged-positions user) ERR-NO-ACTIVE-POSITION)))
+    (map-delete leveraged-positions user)
+    ;; Additional logic for transferring funds would go here
+    (ok position)))
 
-(define-public (liquidateLeveragedPosition)
-  // Function to liquidate an active leveraged $BTC trading position
-  (success
-    (let ((userPosition (map-get leveragedPositions (tx-sender) (tuple 0 0))))
-      (assert (> (tuple-get userPosition 0) 0) "No active position to liquidate")
-      (transfer (someOtherAddress) (tuple-get userPosition 0)))))
+;; Read-only functions for querying state
+(define-read-only (get-btc-stake (user principal))
+  (default-to u0 (map-get? btc-stakes user)))
+
+(define-read-only (get-liquidity (user principal))
+  {btc: (default-to u0 (map-get? btc-liquidity user)),
+   usd: (default-to u0 (map-get? usd-liquidity user))})
+
+(define-read-only (get-leveraged-position (user principal))
+  (map-get? leveraged-positions user))
