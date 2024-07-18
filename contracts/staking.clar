@@ -4,6 +4,10 @@
 (define-constant ERR-INSUFFICIENT-STAKE (err u100))
 (define-constant ERR-INSUFFICIENT-LIQUIDITY (err u101))
 (define-constant ERR-NO-ACTIVE-POSITION (err u102))
+(define-constant ERR-OVERFLOW (err u103))
+(define-constant ERR-INVALID-AMOUNT (err u104))
+(define-constant ERR-INVALID-LEVERAGE (err u105))
+(define-constant ERR-CANNOT-LIQUIDATE-SELF (err u106))
 
 ;; Data Maps
 (define-map btc-stakes principal uint)
@@ -14,6 +18,7 @@
 ;; Staking and Yield section
 (define-public (stake-btc (amount uint))
   (let ((current-stake (default-to u0 (map-get? btc-stakes tx-sender))))
+    (asserts! (< (+ current-stake amount) u340282366920938463463374607431768211455) ERR-OVERFLOW)
     (map-set btc-stakes tx-sender (+ current-stake amount))
     (ok amount)))
 
@@ -28,6 +33,8 @@
   (let 
     ((current-btc (default-to u0 (map-get? btc-liquidity tx-sender)))
      (current-usd (default-to u0 (map-get? usd-liquidity tx-sender))))
+    (asserts! (< (+ current-btc btc-amount) u340282366920938463463374607431768211455) ERR-OVERFLOW)
+    (asserts! (< (+ current-usd usd-amount) u340282366920938463463374607431768211455) ERR-OVERFLOW)
     (map-set btc-liquidity tx-sender (+ current-btc btc-amount))
     (map-set usd-liquidity tx-sender (+ current-usd usd-amount))
     (ok {btc-added: btc-amount, usd-added: usd-amount})))
@@ -44,6 +51,8 @@
 ;; BTC Trading with Leverage section
 (define-public (open-leveraged-position (btc-amount uint) (leverage uint))
   (begin
+    (asserts! (> btc-amount u0) ERR-INVALID-AMOUNT)
+    (asserts! (and (>= leverage u1) (<= leverage u100)) ERR-INVALID-LEVERAGE)
     (map-set leveraged-positions tx-sender {btc-amount: btc-amount, leverage: leverage})
     (ok {btc-amount: btc-amount, leverage: leverage})
   )
@@ -55,10 +64,12 @@
     (ok position)))
 
 (define-public (liquidate-leveraged-position (user principal))
-  (let ((position (unwrap! (map-get? leveraged-positions user) ERR-NO-ACTIVE-POSITION)))
-    (map-delete leveraged-positions user)
-    ;; Additional logic for transferring funds would go here
-    (ok position)))
+  (begin
+    (asserts! (not (is-eq tx-sender user)) ERR-CANNOT-LIQUIDATE-SELF)
+    (let ((position (unwrap! (map-get? leveraged-positions user) ERR-NO-ACTIVE-POSITION)))
+      (map-delete leveraged-positions user)
+      ;; Additional logic for transferring funds would go here
+      (ok position))))
 
 ;; Read-only functions for querying state
 (define-read-only (get-btc-stake (user principal))
