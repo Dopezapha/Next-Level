@@ -43,8 +43,11 @@
 
 ;; BTC Trading with Leverage section
 (define-public (open-leveraged-position (btc-amount uint) (leverage uint))
-  (map-set leveraged-positions tx-sender {btc-amount: btc-amount, leverage: leverage})
-  (ok {btc-amount: btc-amount, leverage: leverage}))
+  (begin
+    (map-set leveraged-positions tx-sender {btc-amount: btc-amount, leverage: leverage})
+    (ok {btc-amount: btc-amount, leverage: leverage})
+  )
+)
 
 (define-public (close-leveraged-position)
   (let ((position (unwrap! (map-get? leveraged-positions tx-sender) ERR-NO-ACTIVE-POSITION)))

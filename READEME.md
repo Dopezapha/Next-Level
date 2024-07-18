@@ -11,6 +11,7 @@ This Clarity smart contract provides functionality for Bitcoin (BTC) staking, li
 3. Leveraged BTC Trading
 4. State Querying
 
+
 ## Functions
 
 ### Staking
