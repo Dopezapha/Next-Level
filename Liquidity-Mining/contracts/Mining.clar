@@ -112,22 +112,23 @@
 (define-public (claim-reward)
   (let (
     (sender tx-sender)
-    (staker-data (unwrap! (map-get? staker-info {staker: sender}) (err u1)))
+    (token (unwrap! (var-get token-address) ERR-NOT-INITIALIZED))
+    (staker-data (unwrap! (map-get? staker-info {staker: sender}) ERR-INSUFFICIENT-BALANCE))
     (balance (get balance staker-data))
     (reward-debt (get reward-debt staker-data))
   )
-    (update-reward)
+    (try! (update-reward))
     (let (
-      (reward (- (* balance (var-get reward-per-token-stored)) reward-debt))
+      (reward (/ (- (* balance (var-get reward-per-token-stored)) (* reward-debt PRECISION)) PRECISION))
     )
       (map-set staker-info 
         {staker: sender}
         {
           balance: balance,
-          reward-debt: (* balance (var-get reward-per-token-stored))
+          reward-debt: (/ (* balance (var-get reward-per-token-stored)) PRECISION)
         }
       )
-      (as-contract (ft-transfer? (var-get token-address) reward (as-contract tx-sender) sender))
+      (as-contract (contract-call? token transfer reward tx-sender sender none))
     )
   )
 )
