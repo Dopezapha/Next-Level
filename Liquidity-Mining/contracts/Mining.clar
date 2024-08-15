@@ -132,3 +132,13 @@
     )
   )
 )
+
+;; Set new reward rate (only owner)
+(define-public (set-reward-rate (new-rate uint))
+  (begin
+    (asserts! (is-owner) ERR-NOT-AUTHORIZED)
+    (try! (update-reward))
+    (var-set reward-rate new-rate)
+    (ok success)
+  )
+)
