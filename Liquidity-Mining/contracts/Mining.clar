@@ -139,9 +139,13 @@
 )
 
 ;; Set new reward rate (only owner)
+(define-constant MIN_RATE u1)
+(define-constant MAX_RATE u1000)
+
 (define-public (set-reward-rate (new-rate uint))
   (begin
     (asserts! (is-owner) ERR-NOT-AUTHORIZED)
+    (asserts! (and (>= new-rate MIN_RATE) (<= new-rate MAX_RATE)) (err u105))
     (try! (update-reward))
     (var-set reward-rate new-rate)
     (ok success)
