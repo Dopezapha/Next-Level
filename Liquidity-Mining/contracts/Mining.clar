@@ -1,3 +1,6 @@
+;; Token trait definition
+(use-trait ft-trait .sip-010-trait.sip-010-trait)
+
 ;; Define the contract
 (define-data-var token-address principal 'SP000000000000000000002Q6VF78)
 (define-data-var lp-token-address principal 'SP000000000000000000003Q6VF78)
