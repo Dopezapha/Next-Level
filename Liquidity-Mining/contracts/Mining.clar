@@ -13,6 +13,12 @@
 ;; Precision constant
 (define-constant PRECISION u1000000)
 
+;; Error constants
+(define-constant ERR-NOT-AUTHORIZED (err u100))
+(define-constant ERR-NOT-INITIALIZED (err u101))
+(define-constant ERR-ALREADY-INITIALIZED (err u102))
+(define-constant ERR-INSUFFICIENT-BALANCE (err u103))
+
 (define-map staker-info 
   ((staker principal)) 
   ((balance uint) (reward-debt uint))
