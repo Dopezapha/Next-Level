@@ -8,6 +8,7 @@
 (define-data-var last-update-time uint u0)
 (define-data-var reward-per-token-stored uint u0)
 (define-data-var total-supply uint u0)
+(define-data-var owner (optional principal) none)
 
 (define-map staker-info 
   ((staker principal)) 
