@@ -76,6 +76,7 @@
     (lp-token (unwrap! (var-get lp-token-address) ERR-NOT-INITIALIZED))
     (current-balance (default-to u0 (get balance (map-get? staker-info {staker: sender}))))
   )
+    (asserts! (> amount u0) (err u104))
     (try! (update-reward))
     (map-set staker-info 
       {staker: sender}
