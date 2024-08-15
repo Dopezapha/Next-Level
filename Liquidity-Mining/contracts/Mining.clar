@@ -29,10 +29,14 @@
   (let 
     (
       (caller tx-sender)
+      (token-principal (contract-of token))
+      (lp-token-principal (contract-of lp-token))
     )
     (asserts! (is-none (var-get owner)) ERR-ALREADY-INITIALIZED)
-    (var-set token-address (some (contract-of token)))
-    (var-set lp-token-address (some (contract-of lp-token)))
+    (asserts! (is-contract token-principal) (err u106))
+    (asserts! (is-contract lp-token-principal) (err u107))
+    (var-set token-address (some token-principal))
+    (var-set lp-token-address (some lp-token-principal))
     (var-set last-update-time block-height)
     (var-set owner (some caller))
     (ok success)
