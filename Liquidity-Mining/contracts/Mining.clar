@@ -69,17 +69,20 @@
 (define-public (stake (amount uint))
   (let (
     (sender tx-sender)
+    (lp-token (unwrap! (var-get lp-token-address) ERR-NOT-INITIALIZED))
     (current-balance (default-to u0 (get balance (map-get? staker-info {staker: sender}))))
   )
-    (update-reward)
+    (try! (update-reward))
     (map-set staker-info 
       {staker: sender}
       {
         balance: (+ current-balance amount),
-        reward-debt: (* (+ current-balance amount) (var-get reward-per-token-stored))
+        reward-debt: (/ (* (+ current-balance amount) (var-get reward-per-token-stored)) PRECISION)
       }
     )
-    (ft-transfer? (var-get lp-token-address) amount sender (as-contract tx-sender))
+    (var-set total-supply (+ (var-get total-supply) amount))
+    (try! (contract-call? lp-token transfer amount sender (as-contract tx-sender) none))
+    (ok success)
   )
 )
 
