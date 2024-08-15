@@ -90,19 +90,21 @@
 (define-public (withdraw (amount uint))
   (let (
     (sender tx-sender)
-    (staker-data (unwrap! (map-get? staker-info {staker: sender}) (err u1)))
+    (lp-token (unwrap! (var-get lp-token-address) ERR-NOT-INITIALIZED))
+    (staker-data (unwrap! (map-get? staker-info {staker: sender}) ERR-INSUFFICIENT-BALANCE))
     (current-balance (get balance staker-data))
   )
-    (asserts! (>= current-balance amount) (err u2))
-    (update-reward)
+    (asserts! (>= current-balance amount) ERR-INSUFFICIENT-BALANCE)
+    (try! (update-reward))
     (map-set staker-info 
       {staker: sender}
       {
         balance: (- current-balance amount),
-        reward-debt: (* (- current-balance amount) (var-get reward-per-token-stored))
+        reward-debt: (/ (* (- current-balance amount) (var-get reward-per-token-stored)) PRECISION)
       }
     )
-    (as-contract (ft-transfer? (var-get lp-token-address) amount (as-contract tx-sender) sender))
+    (var-set total-supply (- (var-get total-supply) amount))
+    (as-contract (contract-call? lp-token transfer amount tx-sender sender none))
   )
 )
 
