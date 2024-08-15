@@ -39,6 +39,11 @@
   )
 )
 
+;; is-owner function
+(define-private (is-owner)
+  (is-eq (some tx-sender) (var-get owner))
+)
+
 ;; Update reward variables
 (define-private (update-reward)
   (let (
