@@ -35,7 +35,7 @@
     (var-set lp-token-address (some (contract-of lp-token)))
     (var-set last-update-time block-height)
     (var-set owner (some caller))
-    (ok true)
+    (ok success)
   )
 )
 
@@ -49,14 +49,19 @@
   (let (
     (current-time block-height)
     (time-elapsed (- current-time (var-get last-update-time)))
-    (rewards (/ (* time-elapsed (var-get reward-rate)) u1000000))
+    (rewards (/ (* time-elapsed (var-get reward-rate)) PRECISION))
+    (current-supply (var-get total-supply))
   )
-    (var-set reward-per-token-stored 
-      (+ (var-get reward-per-token-stored) 
-         (/ rewards (ft-get-supply (var-get lp-token-address)))
+    (if (> current-supply u0)
+      (var-set reward-per-token-stored 
+        (+ (var-get reward-per-token-stored) 
+           (/ (* rewards PRECISION) current-supply)
+        )
       )
+      success
     )
     (var-set last-update-time current-time)
+    (ok success)
   )
 )
 
