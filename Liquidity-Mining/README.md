@@ -1,81 +1,93 @@
-# Stacks Liquidity Mining Contract
-
-This repository contains a Clarity smart contract for liquidity mining on the Stacks blockchain. The contract allows users to stake LP tokens and earn rewards in another token.
+# Liquidity Mining Smart Contract
 
 ## Overview
 
-The contract implements a basic liquidity mining mechanism where users can:
+This Clarity smart contract implements a liquidity mining (staking) mechanism where users can stake LP tokens and earn rewards in another token. The contract allows for staking, withdrawing, and claiming rewards.
 
-1. Stake LP tokens
-2. Withdraw staked LP tokens
-3. Claim rewards
+## Features
 
-The reward rate is configurable by the contract owner.
+- Stake LP tokens
+- Withdraw staked LP tokens
+- Claim rewards
+- Dynamic reward rate adjustable by the contract owner
+- Safety checks to prevent common errors and potential exploits
 
-## Contract Details
+## Contract Functions
 
-- Language: Clarity
-- Blockchain: Stacks
+### Initialize
 
-## Prerequisites
+```clarity
+(define-public (initialize (token <ft-trait>) (lp-token <ft-trait>))
 
-- Clarity language knowledge
-- Stacks blockchain development environment (e.g., Clarinet)
-- SIP-010 fungible token trait implementation
+Initializes the contract with the reward token and LP token addresses. Can only be called once.
 
-## Key Functions
+## Stake
 
-1. `initialize`: Set up the contract with token addresses
-2. `stake`: Stake LP tokens
-3. `withdraw`: Withdraw staked LP tokens
-4. `claim-reward`: Claim accumulated rewards
-5. `set-reward-rate`: Update the reward rate (owner only)
-6. `get-reward-rate`: Read current reward rate
-7. `get-total-supply`: Get total staked amount
-8. `get-staker-info`: Retrieve staker's information
+(define-public (stake (amount uint))
+Allows users to stake LP tokens. The amount must be greater than zero.
 
-## Setup and Deployment
+## Withdraw
 
-1. Deploy the SIP-010 trait contract
-2. Deploy your reward token and LP token contracts (must implement SIP-010)
-3. Deploy this liquidity mining contract
-4. Call the `initialize` function with the addresses of your token contracts
+(define-public (withdraw (amount uint))
+Allows users to withdraw their staked LP tokens.
 
-## Usage
+## Claim Reward
 
-Users can interact with the contract by calling the following functions:
+(define-public (claim-reward)
+Allows users to claim their earned rewards.
 
-- `stake`: To stake LP tokens
-- `withdraw`: To unstake LP tokens
-- `claim-reward`: To claim earned rewards
+## Set Reward Rate
 
-The contract owner can update the reward rate using the `set-reward-rate` function.
+(define-public (set-reward-rate (new-rate uint))
+Allows the contract owner to set a new reward rate. The rate must be between MIN_RATE and MAX_RATE.
+
+## Read-Only Functions
+
+1. (get-reward-rate): Returns the current reward rate.
+2. (get-total-supply): Returns the total amount of staked LP tokens.
+3. (get-staker-info (staker principal)): Returns information about a specific staker.
+
+
+## Constants
+
+1. PRECISION: Set to u1000000 for calculations involving decimals.
+2. MIN_RATE: Minimum allowed reward rate.
+3. MAX_RATE: Maximum allowed reward rate.
+
+
+## Error Codes
+
+1. ERR-NOT-AUTHORIZED (u100): Caller is not authorized to perform the action.
+2. ERR-NOT-INITIALIZED (u101): Contract has not been initialized.
+3. ERR-ALREADY-INITIALIZED (u102): Contract has already been initialized.
+4. ERR-INSUFFICIENT-BALANCE (u103): User has insufficient balance for the action.
+5. ERR-INVALID-AMOUNT (u104): Invalid amount specified (e.g., zero or negative).
+6. ERR-INVALID-RATE (u105): Invalid reward rate specified.
+7. ERR-INVALID-TOKEN-CONTRACT (u106): Invalid token contract address.
+8. ERR-INVALID-LP-TOKEN-CONTRACT (u107): Invalid LP token contract address.
+
 
 ## Security Considerations
 
-- This contract has not been audited and is for educational purposes only
-- Thorough testing and a professional audit are strongly recommended before any production use
-- Ensure proper access controls and parameter validations in a production environment
+1. The contrat includes checks to ensure that token addresses are valid contracts.
+2. Staking and reward rate changes include bounds checking to prevent potential exploits.
+3. The contract uses the SIP-010 fungible token standard for compatibility.
 
-## Error Handling
 
-The contract uses custom error codes for various scenarios:
+## Usage
 
-- `ERR-NOT-AUTHORIZED` (u100): Caller is not the contract owner
-- `ERR-NOT-INITIALIZED` (u101): Contract has not been initialized
-- `ERR-ALREADY-INITIALIZED` (u102): Contract has already been initialized
-- `ERR-INSUFFICIENT-BALANCE` (u103): User has insufficient balance for the operation
+1. Deploy the contract to the Stacks blockchain.
+2. Initialize the contract with the reward token and LP token addresses.
+3. Users can then stake LP tokens, withdraw them, and claim rewards.
+4. The contract owner can adjust the reward rate as needed.
 
-## Limitations and Future Improvements
 
-- The contract uses block height as a proxy for time, which may not be ideal in all scenarios
-- More sophisticated reward calculation mechanisms could be implemented
-- Additional features like emergency withdrawal or reward lockup periods could be added
+## Development and Testing
 
-## License
+This contract can be tested and deployed using the Clarinet development environment. Use the following command to check for errors:
+Copyclarinet check Mining.clar
+Ensure all warnings and errors are addressed before deploying to mainnet.
 
-The smart contract was written by Chukwudi Nwaneri using clarity 
 
-## Disclaimer
-
-This smart contract is provided as-is with no guarantees or warranties. Use at your own risk.
+## Author
+Chukwudi Nwaneri
