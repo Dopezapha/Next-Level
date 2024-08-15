@@ -142,3 +142,18 @@
     (ok success)
   )
 )
+
+;; Get current reward rate
+(define-read-only (get-reward-rate)
+  (ok (var-get reward-rate))
+)
+
+;; Get total staked amount
+(define-read-only (get-total-supply)
+  (ok (var-get total-supply))
+)
+
+;; Get staker info
+(define-read-only (get-staker-info (staker principal))
+  (ok (map-get? staker-info {staker: staker}))
+)
