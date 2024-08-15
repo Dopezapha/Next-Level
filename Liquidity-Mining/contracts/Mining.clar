@@ -25,11 +25,16 @@
 )
 
 ;; Initialize the contract
-(define-public (initialize (token principal) (lp-token principal))
-  (begin
-    (var-set token-address token)
-    (var-set lp-token-address lp-token)
+(define-public (initialize (token <ft-trait>) (lp-token <ft-trait>))
+  (let 
+    (
+      (caller tx-sender)
+    )
+    (asserts! (is-none (var-get owner)) ERR-ALREADY-INITIALIZED)
+    (var-set token-address (some (contract-of token)))
+    (var-set lp-token-address (some (contract-of lp-token)))
     (var-set last-update-time block-height)
+    (var-set owner (some caller))
     (ok true)
   )
 )
