@@ -18,6 +18,10 @@
 (define-constant ERR-NOT-INITIALIZED (err u101))
 (define-constant ERR-ALREADY-INITIALIZED (err u102))
 (define-constant ERR-INSUFFICIENT-BALANCE (err u103))
+(define-constant ERR-INVALID-TOKEN-CONTRACT (err u106))
+(define-constant ERR-INVALID-LP-TOKEN-CONTRACT (err u107))
+(define-constant ERR-INVALID-AMOUNT (err u104))
+(define-constant ERR-INVALID-RATE (err u105))
 
 (define-map staker-info 
   ((staker principal)) 
