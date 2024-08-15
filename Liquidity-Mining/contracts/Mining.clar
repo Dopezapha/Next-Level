@@ -10,6 +10,9 @@
 (define-data-var total-supply uint u0)
 (define-data-var owner (optional principal) none)
 
+;; Precision constant
+(define-constant PRECISION u1000000)
+
 (define-map staker-info 
   ((staker principal)) 
   ((balance uint) (reward-debt uint))
