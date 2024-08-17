@@ -1,10 +1,12 @@
 import React from 'react';
+import { useContractCalls } from '../hooks/useContractCalls';
 
 function ContractInfo() {
-  const contractInfo = {
-    rewardRate: 100,
-    totalSupply: 10000
-  };
+  const { contractInfo, loading } = useContractCalls();
+
+  if (loading) {
+    return <div>Loading contract info...</div>;
+  }
 
   return (
     <div>

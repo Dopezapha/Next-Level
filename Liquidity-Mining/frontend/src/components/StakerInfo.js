@@ -1,10 +1,12 @@
 import React from 'react';
+import { useContractCalls } from '../hooks/useContractCalls';
 
 function StakerInfo() {
-  const stakerInfo = {
-    balance: 1000,
-    rewardDebt: 50
-  };
+  const { stakerInfo, loading } = useContractCalls();
+
+  if (loading) {
+    return <div>Loading staker info...</div>;
+  }
 
   return (
     <div>

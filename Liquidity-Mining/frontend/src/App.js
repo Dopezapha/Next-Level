@@ -1,19 +1,10 @@
 import React from 'react';
-import StakeForm from './StakeForm';
-import WithdrawForm from './WithdrawForm';
-import ClaimRewards from './ClaimRewards';
-import StakerInfo from './StakerInfo';
-import ContractInfo from './ContractInfo';
+import Dashboard from './containers/Dashboard';
 
 function App() {
   return (
     <div className="App">
-      <h1>Liquidity Mining Dashboard</h1>
-      <ContractInfo />
-      <StakerInfo />
-      <StakeForm />
-      <WithdrawForm />
-      <ClaimRewards />
+      <Dashboard />
     </div>
   );
 }

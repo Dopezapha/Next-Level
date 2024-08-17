@@ -1,11 +1,23 @@
 import React, { useState } from 'react';
+import { useContractCalls } from '../hooks/useContractCalls';
 
 function WithdrawForm() {
   const [amount, setAmount] = useState('');
+  const { withdraw, loading } = useContractCalls();
 
-  const handleWithdraw = (e) => {
+  const handleWithdraw = async (e) => {
     e.preventDefault();
-    console.log('Withdrawing:', amount);
+    if (!amount || isNaN(amount)) {
+      alert('Please enter a valid amount');
+      return;
+    }
+    try {
+      await withdraw(Number(amount));
+      setAmount('');
+    } catch (error) {
+      console.error('Withdrawal failed:', error);
+      alert('Withdrawal failed. Please try again.');
+    }
   };
 
   return (
@@ -16,8 +28,12 @@ function WithdrawForm() {
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
         placeholder="Amount to withdraw"
+        min="0"
+        step="1"
       />
-      <button type="submit">Withdraw</button>
+      <button type="submit" disabled={loading}>
+        {loading ? 'Withdrawing...' : 'Withdraw'}
+      </button>
     </form>
   );
 }
