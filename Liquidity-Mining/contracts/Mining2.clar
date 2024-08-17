@@ -1,30 +1,177 @@
+;; Smart contract managing Liquidity Mining.
 
-;; title: Mining2
-;; version:
-;; summary:
-;; description:
+;; Token trait definition
+(use-trait ft-trait .sip-010-trait.sip-010-trait)
 
-;; traits
-;;
+;; Define the contract
+(define-data-var token-address (optional principal) none)
+(define-data-var lp-token-address (optional principal) none)
+(define-data-var reward-rate uint u100)
+(define-data-var last-update-time uint u0)
+(define-data-var reward-per-token-stored uint u0)
+(define-data-var total-supply uint u0)
+(define-data-var owner (optional principal) none)
 
-;; token definitions
-;;
+;; Precision constant
+(define-constant PRECISION u1000000)
 
-;; constants
-;;
+;; Error constants
+(define-constant ERR-NOT-AUTHORIZED (err u100))
+(define-constant ERR-NOT-INITIALIZED (err u101))
+(define-constant ERR-ALREADY-INITIALIZED (err u102))
+(define-constant ERR-INSUFFICIENT-BALANCE (err u103))
+(define-constant ERR-INVALID-TOKEN-CONTRACT (err u106))
+(define-constant ERR-INVALID-LP-TOKEN-CONTRACT (err u107))
+(define-constant ERR-INVALID-AMOUNT (err u104))
+(define-constant ERR-INVALID-RATE (err u105))
 
-;; data vars
-;;
+(define-map staker-info 
+  {staker: principal}
+  {balance: uint, reward-debt: uint}
+)
 
-;; data maps
-;;
+;; Initialize the contract
+(define-public (initialize (token <ft-trait>) (lp-token <ft-trait>))
+  (let 
+    (
+      (caller tx-sender)
+      (token-principal (contract-of token))
+      (lp-token-principal (contract-of lp-token))
+    )
+    (asserts! (is-none (var-get owner)) ERR-ALREADY-INITIALIZED)
+    (var-set token-address (some token-principal))
+    (var-set lp-token-address (some lp-token-principal))
+    (var-set last-update-time block-height)
+    (var-set owner (some caller))
+    (ok true)
+  )
+)
 
-;; public functions
-;;
+;; is-owner function
+(define-private (is-owner)
+  (is-eq (some tx-sender) (var-get owner))
+)
 
-;; read only functions
-;;
+;; Update reward variables
+(define-private (update-reward)
+  (let (
+    (current-time block-height)
+    (time-elapsed (- current-time (var-get last-update-time)))
+    (rewards (/ (* time-elapsed (var-get reward-rate)) PRECISION))
+    (current-supply (var-get total-supply))
+  )
+    (if (> current-supply u0)
+      (var-set reward-per-token-stored 
+        (+ (var-get reward-per-token-stored) 
+           (/ (* rewards PRECISION) current-supply)
+        )
+      )
+      true
+    )
+    (var-set last-update-time current-time)
+    true
+  )
+)
 
-;; private functions
-;;
+;; Stake LP tokens
+(define-public (stake (amount uint))
+  (let (
+    (sender tx-sender)
+    (lp-token-principal (unwrap! (var-get lp-token-address) ERR-NOT-INITIALIZED))
+    (current-balance (default-to u0 (get balance (map-get? staker-info {staker: sender}))))
+  )
+    (asserts! (> amount u0) ERR-INVALID-AMOUNT)
+    (update-reward)
+    (map-set staker-info 
+      {staker: sender}
+      {
+        balance: (+ current-balance amount),
+        reward-debt: (/ (* (+ current-balance amount) (var-get reward-per-token-stored)) PRECISION)
+      }
+    )
+    (var-set total-supply (+ (var-get total-supply) amount))
+    (let ((lp-token (contract-call? lp-token-principal .sip-010-trait)))
+      (as-contract (contract-call? lp-token transfer amount sender (as-contract tx-sender) none))
+    )
+  )
+)
 
+;; Withdraw LP tokens
+(define-public (withdraw (amount uint))
+  (let (
+    (sender tx-sender)
+    (lp-token-principal (unwrap! (var-get lp-token-address) ERR-NOT-INITIALIZED))
+    (staker-data (unwrap! (map-get? staker-info {staker: sender}) ERR-INSUFFICIENT-BALANCE))
+    (current-balance (get balance staker-data))
+  )
+    (asserts! (>= current-balance amount) ERR-INSUFFICIENT-BALANCE)
+    (update-reward)
+    (map-set staker-info 
+      {staker: sender}
+      {
+        balance: (- current-balance amount),
+        reward-debt: (/ (* (- current-balance amount) (var-get reward-per-token-stored)) PRECISION)
+      }
+    )
+    (var-set total-supply (- (var-get total-supply) amount))
+    (let ((lp-token (contract-call? lp-token-principal .sip-010-trait)))
+      (as-contract (contract-call? lp-token transfer amount tx-sender sender none))
+    )
+  )
+)
+
+;; Claim rewards
+(define-public (claim-reward)
+  (let (
+    (sender tx-sender)
+    (token-principal (unwrap! (var-get token-address) ERR-NOT-INITIALIZED))
+    (staker-data (unwrap! (map-get? staker-info {staker: sender}) ERR-INSUFFICIENT-BALANCE))
+    (balance (get balance staker-data))
+    (reward-debt (get reward-debt staker-data))
+  )
+    (update-reward)
+    (let (
+      (reward (/ (- (* balance (var-get reward-per-token-stored)) (* reward-debt PRECISION)) PRECISION))
+    )
+      (map-set staker-info 
+        {staker: sender}
+        {
+          balance: balance,
+          reward-debt: (/ (* balance (var-get reward-per-token-stored)) PRECISION)
+        }
+      )
+      (let ((token (contract-call? token-principal .sip-010-trait)))
+        (as-contract (contract-call? token transfer reward tx-sender sender none))
+      )
+    )
+  )
+)
+
+;; Set new reward rate (only owner)
+(define-constant MIN-RATE u1)
+(define-constant MAX-RATE u1000)
+
+(define-public (set-reward-rate (new-rate uint))
+  (begin
+    (asserts! (is-owner) ERR-NOT-AUTHORIZED)
+    (asserts! (and (>= new-rate MIN-RATE) (<= new-rate MAX-RATE)) ERR-INVALID-RATE)
+    (try! (update-reward))
+    (var-set reward-rate new-rate)
+    (ok true)
+  )
+)
+
+;; Get current reward rate
+(define-read-only (get-reward-rate)
+  (ok (var-get reward-rate))
+)
+
+;; Get total staked amount
+(define-read-only (get-total-supply)
+  (ok (var-get total-supply))
+)
+
+;; Get staker info
+(define-read-only (get-staker-info (staker principal))
+  (ok (map-get? staker-info {staker: staker}))
+)
