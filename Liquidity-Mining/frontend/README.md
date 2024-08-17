@@ -1,4 +1,4 @@
-# Liquidity Mining Dashboard
+## Liquidity Mining Dashboard
 
 ## Overview
 
