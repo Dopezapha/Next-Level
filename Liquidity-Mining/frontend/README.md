@@ -31,7 +31,7 @@ git clone https://github.com/Dopezapha/liquidity-Mining.git
 cd liquidity-Mining
 
 3. Install the dependencies:
-npm install
+npm install @stacks/connect @stacks/transactions @stacks/network
 
 4. Create a `.env` file in the root directory and add your contract address:
 REACT_APP_CONTRACT_ADDRESS=YOUR_CONTRACT_ADDRESS_HERE
