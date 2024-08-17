@@ -1,3 +1,5 @@
+;; Smart contract managing Liquidity Mining.
+
 ;; Token trait definition
 (use-trait ft-trait .sip-010-trait.sip-010-trait)
 
