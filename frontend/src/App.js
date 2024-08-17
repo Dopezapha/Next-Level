@@ -2,7 +2,8 @@ import React from 'react';
 import { Web3Provider } from './contexts/Web3Context';
 import AccountInfo from './components/AccountInfo/AccountInfo';
 import StakingForm from './components/StakingForm/StakingForm';
-import YieldDisplay from './components/YieldDisplay/YieldDisplay';
+import LiquidityForm from './components/LiquidityForm/LiquidityForm';
+import LeverageForm from './components/LeverageForm/LeverageForm';
 import styles from './App.module.css';
 
 function App() {
@@ -12,7 +13,8 @@ function App() {
         <h1>Bitcoin Staking and Yield Optimization</h1>
         <AccountInfo />
         <StakingForm />
-        <YieldDisplay />
+        <LiquidityForm />
+        <LeverageForm />
       </div>
     </Web3Provider>
   );
