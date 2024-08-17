@@ -63,4 +63,5 @@ Contributions to this project are welcome. Please follow these steps:
 6. Open a Pull Request
 
 ## Contact
- Chukwudi Nwaneri or Email: officialnwaneridaniel@gmail.com
+ Chukwudi Nwaneri or
+ Email: officialnwaneridaniel@gmail.com
