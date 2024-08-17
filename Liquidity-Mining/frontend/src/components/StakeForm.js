@@ -1,19 +1,28 @@
 import React, { useState } from 'react';
 import { useContractCalls } from '../hooks/useContractCalls';
+import { useUser } from '../contexts/UserContext';
 
+// IMPLEMENTED: User authentication check and improved error handling
 function StakeForm() {
   const [amount, setAmount] = useState('');
   const { stake, loading } = useContractCalls();
+  const { userData, signin } = useUser();
 
   const handleStake = async (e) => {
     e.preventDefault();
-    if (!amount || isNaN(amount)) {
-      alert('Please enter a valid amount');
+    if (!userData) {
+      alert('Please sign in to stake');
+      signin();
+      return;
+    }
+    if (!amount || isNaN(amount) || Number(amount) <= 0) {
+      alert('Please enter a valid positive amount');
       return;
     }
     try {
       await stake(Number(amount));
       setAmount('');
+      alert('Staking successful!');
     } catch (error) {
       console.error('Staking failed:', error);
       alert('Staking failed. Please try again.');
