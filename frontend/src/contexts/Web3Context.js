@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { useWeb3 } from '../hooks/useWeb3';
 
 export const Web3Context = createContext();
@@ -10,13 +10,9 @@ export const Web3Provider = ({ children }) => {
   const [leveragedPosition, setLeveragedPosition] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (contract && account) {
-      fetchAccountInfo();
-    }
-  }, [contract, account]);
+  const fetchAccountInfo = useCallback(async () => {
+    if (!contract || !account) return;
 
-  const fetchAccountInfo = async () => {
     try {
       const stake = await contract.methods.getBtcStake(account).call();
       const liq = await contract.methods.getLiquidity(account).call();
@@ -27,92 +23,61 @@ export const Web3Provider = ({ children }) => {
         btc: web3.utils.fromWei(liq.btc, 'ether'),
         usd: web3.utils.fromWei(liq.usd, 'ether')
       });
-      setLeveragedPosition(position ? {
+      setLeveragedPosition(position.btcAmount !== '0' ? {
         btcAmount: web3.utils.fromWei(position.btcAmount, 'ether'),
         leverage: position.leverage
       } : null);
     } catch (error) {
       console.error('Error fetching account info:', error);
     }
+  }, [contract, account, web3]);
+
+  useEffect(() => {
+    fetchAccountInfo();
+  }, [fetchAccountInfo]);
+
+  const executeContractMethod = async (method, ...args) => {
+    setIsLoading(true);
+    try {
+      await method(...args).send({ from: account });
+      await fetchAccountInfo();
+    } catch (error) {
+      console.error('Contract method execution error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const stakeBtc = async (amount) => {
-    setIsLoading(true);
-    try {
-      const weiAmount = web3.utils.toWei(amount, 'ether');
-      await contract.methods.stakeBtc(weiAmount).send({ from: account });
-      await fetchAccountInfo();
-    } catch (error) {
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+    const weiAmount = web3.utils.toWei(amount, 'ether');
+    await executeContractMethod(contract.methods.stakeBtc, weiAmount);
   };
 
   const unstakeBtc = async (amount) => {
-    setIsLoading(true);
-    try {
-      const weiAmount = web3.utils.toWei(amount, 'ether');
-      await contract.methods.unstakeBtc(weiAmount).send({ from: account });
-      await fetchAccountInfo();
-    } catch (error) {
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+    const weiAmount = web3.utils.toWei(amount, 'ether');
+    await executeContractMethod(contract.methods.unstakeBtc, weiAmount);
   };
 
   const addLiquidity = async (btcAmount, usdAmount) => {
-    setIsLoading(true);
-    try {
-      const weiBtc = web3.utils.toWei(btcAmount, 'ether');
-      const weiUsd = web3.utils.toWei(usdAmount, 'ether');
-      await contract.methods.addLiquidityBtc(weiBtc, weiUsd).send({ from: account });
-      await fetchAccountInfo();
-    } catch (error) {
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+    const weiBtc = web3.utils.toWei(btcAmount, 'ether');
+    const weiUsd = web3.utils.toWei(usdAmount, 'ether');
+    await executeContractMethod(contract.methods.addLiquidityBtc, weiBtc, weiUsd);
   };
 
   const removeLiquidity = async (btcAmount, usdAmount) => {
-    setIsLoading(true);
-    try {
-      const weiBtc = web3.utils.toWei(btcAmount, 'ether');
-      const weiUsd = web3.utils.toWei(usdAmount, 'ether');
-      await contract.methods.removeLiquidityBtc(weiBtc, weiUsd).send({ from: account });
-      await fetchAccountInfo();
-    } catch (error) {
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+    const weiBtc = web3.utils.toWei(btcAmount, 'ether');
+    const weiUsd = web3.utils.toWei(usdAmount, 'ether');
+    await executeContractMethod(contract.methods.removeLiquidityBtc, weiBtc, weiUsd);
   };
 
   const openLeveragedPosition = async (btcAmount, leverage) => {
-    setIsLoading(true);
-    try {
-      const weiBtc = web3.utils.toWei(btcAmount, 'ether');
-      await contract.methods.openLeveragedPosition(weiBtc, leverage).send({ from: account });
-      await fetchAccountInfo();
-    } catch (error) {
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+    const weiBtc = web3.utils.toWei(btcAmount, 'ether');
+    await executeContractMethod(contract.methods.openLeveragedPosition, weiBtc, leverage);
   };
 
   const closeLeveragedPosition = async () => {
-    setIsLoading(true);
-    try {
-      await contract.methods.closeLeveragedPosition().send({ from: account });
-      await fetchAccountInfo();
-    } catch (error) {
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+    await executeContractMethod(contract.methods.closeLeveragedPosition);
   };
 
   return (

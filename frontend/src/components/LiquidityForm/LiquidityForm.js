@@ -9,34 +9,45 @@ function LiquidityForm() {
 
   const handleAddLiquidity = async (e) => {
     e.preventDefault();
-    if (!btcAmount || !usdAmount || isNaN(btcAmount) || isNaN(usdAmount) || parseFloat(btcAmount) <= 0 || parseFloat(usdAmount) <= 0) {
-      alert('Please enter valid amounts');
-      return;
-    }
+    if (!validateAmounts(btcAmount, usdAmount)) return;
     try {
       await addLiquidity(btcAmount, usdAmount);
-      setBtcAmount('');
-      setUsdAmount('');
+      resetForm();
     } catch (error) {
-      console.error('Add liquidity error:', error);
-      alert('An error occurred while adding liquidity. Please try again.');
+      handleError('Add liquidity error', error);
     }
   };
 
   const handleRemoveLiquidity = async (e) => {
     e.preventDefault();
-    if (!btcAmount || !usdAmount || isNaN(btcAmount) || isNaN(usdAmount) || parseFloat(btcAmount) <= 0 || parseFloat(usdAmount) <= 0) {
-      alert('Please enter valid amounts');
-      return;
-    }
+    if (!validateAmounts(btcAmount, usdAmount)) return;
     try {
       await removeLiquidity(btcAmount, usdAmount);
-      setBtcAmount('');
-      setUsdAmount('');
+      resetForm();
     } catch (error) {
-      console.error('Remove liquidity error:', error);
-      alert('An error occurred while removing liquidity. Please try again.');
+      handleError('Remove liquidity error', error);
     }
+  };
+
+  // CHANGE: Added validation function
+  const validateAmounts = (btc, usd) => {
+    if (!btc || !usd || isNaN(btc) || isNaN(usd) || parseFloat(btc) <= 0 || parseFloat(usd) <= 0) {
+      alert('Please enter valid positive amounts for both BTC and USD');
+      return false;
+    }
+    return true;
+  };
+
+  // CHANGE: Added error handling function
+  const handleError = (message, error) => {
+    console.error(`${message}:`, error);
+    alert(`An error occurred: ${error.message || 'Unknown error'}`);
+  };
+
+  // CHANGE: Added form reset function
+  const resetForm = () => {
+    setBtcAmount('');
+    setUsdAmount('');
   };
 
   return (

@@ -8,32 +8,39 @@ function StakingForm() {
 
   const handleStake = async (e) => {
     e.preventDefault();
-    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-      alert('Please enter a valid amount');
-      return;
-    }
+    if (!validateAmount(amount)) return;
     try {
       await stakeBtc(amount);
       setAmount('');
     } catch (error) {
-      console.error('Staking error:', error);
-      alert('An error occurred while staking. Please try again.');
+      handleError('Staking error', error);
     }
   };
 
   const handleUnstake = async (e) => {
     e.preventDefault();
-    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-      alert('Please enter a valid amount');
-      return;
-    }
+    if (!validateAmount(amount)) return;
     try {
       await unstakeBtc(amount);
       setAmount('');
     } catch (error) {
-      console.error('Unstaking error:', error);
-      alert('An error occurred while unstaking. Please try again.');
+      handleError('Unstaking error', error);
     }
+  };
+
+  // CHANGE: Added validation function
+  const validateAmount = (value) => {
+    if (!value || isNaN(value) || parseFloat(value) <= 0) {
+      alert('Please enter a valid positive amount');
+      return false;
+    }
+    return true;
+  };
+
+  // CHANGE: Added error handling function
+  const handleError = (message, error) => {
+    console.error(`${message}:`, error);
+    alert(`An error occurred: ${error.message || 'Unknown error'}`);
   };
 
   return (

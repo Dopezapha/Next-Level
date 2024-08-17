@@ -11,10 +11,13 @@ function App() {
     <Web3Provider>
       <div className={styles.app}>
         <h1>Bitcoin Staking and Yield Optimization</h1>
-        <AccountInfo />
-        <StakingForm />
-        <LiquidityForm />
-        <LeverageForm />
+        <div className={styles.grid}>
+          {/* CHANGE: Wrapped components in a grid for better layout */}
+          <AccountInfo />
+          <StakingForm />
+          <LiquidityForm />
+          <LeverageForm />
+        </div>
       </div>
     </Web3Provider>
   );

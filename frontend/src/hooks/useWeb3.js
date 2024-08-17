@@ -12,7 +12,7 @@ export const useWeb3 = () => {
       if (window.ethereum) {
         const web3Instance = new Web3(window.ethereum);
         try {
-          await window.ethereum.enable();
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
           const accounts = await web3Instance.eth.getAccounts();
           const contractInstance = new web3Instance.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
           
