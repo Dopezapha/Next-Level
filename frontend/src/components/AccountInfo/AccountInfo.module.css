@@ -1,0 +1,16 @@
+.accountInfo {
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .accountInfo h2 {
+    color: #333;
+    margin-bottom: 15px;
+  }
+  
+  .accountInfo p {
+    margin: 10px 0;
+  }
+  

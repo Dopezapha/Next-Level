@@ -1,21 +1,22 @@
+import { Clarinet, Tx, Chain, Account, types } from "@hirosystems/clarinet-sdk";
+import { assert } from 'chai';
 
-import { describe, expect, it } from "vitest";
+Clarinet.test({
+    name: "Ensure that users can stake BTC",
+    async fn(chain: Chain, accounts: Map<string, Account>) {
+        // Get the test accounts
+        const user1 = accounts.get('wallet_1')!;
 
-const accounts = simnet.getAccounts();
-const address1 = accounts.get("wallet_1")!;
+        // Mine a block with a stake-btc transaction
+        let block = chain.mineBlock([
+            Tx.contractCall('staking', 'stake-btc', [types.uint(1000)], user1.address)
+        ]);
 
-/*
-  The test below is an example. To learn more, read the testing documentation here:
-  https://docs.hiro.so/clarinet/feature-guides/test-contract-with-clarinet-sdk
-*/
-
-describe("example tests", () => {
-  it("ensures simnet is well initalised", () => {
-    expect(simnet.blockHeight).toBeDefined();
-  });
-
-  // it("shows an example", () => {
-  //   const { result } = simnet.callReadOnlyFn("counter", "get-counter", [], address1);
-  //   expect(result).toBeUint(0);
-  // });
+        // Check the receipts
+        assert.equal(block.receipts.length, 1);
+        assert.equal(block.height, 2);
+        
+        // Check that the stake was successful and returned the correct amount
+        block.receipts[0].result.expectOk().expectUint(1000);
+    },
 });

@@ -1,0 +1,35 @@
+.stakingForm {
+    background-color: #e6f7ff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .stakingForm h2 {
+    color: #0066cc;
+    margin-bottom: 15px;
+  }
+  
+  .stakingForm input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .stakingForm button {
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin-right: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .stakingForm button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
