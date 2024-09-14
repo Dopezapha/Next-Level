@@ -1,17 +1,12 @@
 [project]
-name = 'Liquidity-Mining'
+name = 'Bounty'
 description = ''
 authors = []
 telemetry = true
 cache_dir = './.cache'
 requirements = []
-[contracts.Mining2]
-path = 'contracts/Mining2.clar'
-clarity_version = 2
-epoch = 2.5
-
-[contracts.sip-010-trait]
-path = 'contracts/sip-010-trait.clar'
+[contracts.bounty-reward]
+path = 'contracts/bounty-reward.clar'
 clarity_version = 2
 epoch = 2.5
 [repl.analysis]
