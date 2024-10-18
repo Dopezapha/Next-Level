@@ -1,0 +1,160 @@
+:root {
+    --primary-color: #1a5f7a;
+    --secondary-color: #159895;
+    --accent-color: #57c5b6;
+    --background-color: #f5f5f5;
+    --text-color: #333;
+    --error-color: #e74c3c;
+    --success-color: #2ecc71;
+  }
+  
+  body {
+    font-family: 'Roboto', Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+  }
+  
+  .app {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  /* Header Styles */
+  .header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+  }
+  
+  .header nav {
+    margin-top: 1rem;
+  }
+  
+  .header button {
+    background-color: transparent;
+    border: 1px solid white;
+    color: white;
+    cursor: pointer;
+    margin: 0 0.5rem;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .header button.active,
+  .header button:hover {
+    background-color: white;
+    color: var(--primary-color);
+  }
+  
+  /* Dashboard Styles */
+  .dashboard {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 2rem;
+    padding: 2rem;
+  }
+  
+  h2 {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 0.5rem;
+  }
+  
+  h3 {
+    color: var(--secondary-color);
+    margin-top: 1.5rem;
+  }
+  
+  /* Form Styles */
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+  }
+  
+  input,
+  select {
+    display: block;
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: border-color 0.3s ease;
+  }
+  
+  input:focus,
+  select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+  }
+  
+  button {
+    background-color: var(--secondary-color);
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.7rem 1.5rem;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: var(--primary-color);
+  }
+  
+  /* Utility Classes */
+  .error {
+    color: var(--error-color);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+  }
+  
+  .success {
+    color: var(--success-color);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+  }
+  
+  .loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .app {
+      padding: 10px;
+    }
+  
+    .header button {
+      display: block;
+      margin: 0.5rem auto;
+      width: 80%;
+    }
+  }
